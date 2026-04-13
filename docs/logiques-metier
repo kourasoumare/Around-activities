@@ -1,0 +1,71 @@
+Règles sur les sorties :
+- Une sortie ne peut être supprimée que par 
+  son organisateur
+- Une sortie doit avoir obligatoirement : un titre, 
+  une catégorie, un lieu, une date et un nombre 
+  maximum de participants
+- Une sortie ne peut pas avoir une date dans le passé
+- Une sortie doit avoir au minimum 2 participants 
+  maximum (sinon c'est une sortie solo)
+
+Règles sur les participations :
+- Un utilisateur peut rejoindre une sortie uniquement 
+  si le nombre maximum de participants n'est pas atteint
+- Un utilisateur ne peut pas rejoindre sa propre sortie 
+  car il en est déjà l'organisateur
+- Un utilisateur peut rejoindre plusieurs sorties 
+  en même temps
+- Un utilisateur peut se retirer d'une sortie 
+  quand il veut
+- Un organisateur ne peut pas se retirer de 
+  sa propre sortie
+
+Règles sur les comptes :
+- Un email ne peut pas être utilisé deux fois
+- Un utilisateur doit être connecté pour créer 
+  ou rejoindre une sortie
+
+Fonctionnalité future :
+- Signaler à l'utilisateur quand deux de ses sorties 
+  tombent le même jour et lui proposer d'en annuler 
+  une ou de garder les deux
+
+## 8) Installation (à compléter quand le code existe)
+
+### Frontend
+- à compléter
+
+### Backend
+- à compléter
+
+## 9) Roadmap 2 mois
+
+### Semaine 1-2 : Mise en place
+- Initialisation du repo GitHub
+- Structure des dossiers
+- Documentation complète (README, modèles, routes)
+- Maquettes des pages sur Figma
+- Setup frontend React + backend Node.js
+- Connexion base de données MySQL
+
+### Semaine 3-4 : Authentification
+- Inscription et connexion utilisateur
+- Profil utilisateur
+- Protection des routes privées
+
+### Semaine 5-6 : Fonctionnalités principales
+- Affichage des sorties par catégorie
+- Détail d'une sortie
+- Créer une sortie
+- Rejoindre / se retirer d'une sortie
+- Affichage des membres d'une sortie
+
+### Semaine 7 : Intégration et tests
+- Connexion frontend + backend
+- Tests de toutes les fonctionnalités
+- Correction des bugs
+
+### Semaine 8 : Finalisation
+- Design final et responsive mobile
+- Déploiement
+- Préparation de la présentation
