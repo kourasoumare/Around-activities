@@ -16,6 +16,7 @@ export const register = async ({prénom, Nom, Email, mot_de_passe, confirmer_le_
 
   if (existsUser) {
     const error = new Error("Cet email est déjà utilisé")
+    const error = new Error("L'Email a déjà été utilisé")
     error.statusCode = 409
     throw error
   }
@@ -33,6 +34,7 @@ export const register = async ({prénom, Nom, Email, mot_de_passe, confirmer_le_
 
   const { password, ...userSansMotDePasse } = newUser
   return { message: "Inscription réussie", user: userSansMotDePasse }
+  return { message: "Inscription réussie", user: newUser }
 }
 
 export const login = async ({ Email, mot_de_passe }) => {
@@ -45,6 +47,7 @@ export const login = async ({ Email, mot_de_passe }) => {
   }
 
   // 404 - Email introuvable
+  // Vérifier que l'email existe et que le mot de passe est correct
   const user = await prisma.users.findUnique({
     where: { email: Email }
   })
@@ -58,6 +61,8 @@ export const login = async ({ Email, mot_de_passe }) => {
   // 401 - Mauvais mot de passe
   if (user.password !== mot_de_passe) {
     const error = new Error("Mot de passe incorrect")
+  if (!user || user.password !== mot_de_passe) {
+    const error = new Error("Email ou mot de passe incorrect")
     error.statusCode = 401
     throw error
   }
@@ -65,3 +70,6 @@ export const login = async ({ Email, mot_de_passe }) => {
   const { password, ...userSansMotDePasse } = user
   return { message: "Connexion réussie", user: userSansMotDePasse }
 }
+  // Retourner l'utilisateur connecté
+  const { password, ...userSansMotDePasse } = user
+return { message: "Connexion réussie", user: userSansMotDePasse }}
