@@ -1,28 +1,21 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-/*preparation des routes pour mes devs*/
-import authRoutes from './routes/auth.js'
-import userRoutes from './routes/users.js'
-import activityRoutes from './routes/activities.js'
+import express from 'express'
+import cors from 'cors'
+import dotenv from 'dotenv'
 import groupRoutes from './routes/groups.js'
+import authRoutes from './routes/auth.js'
 
-dotenv.config();
+dotenv.config()
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+const app = express()
 
-app.get("/", (req, res) => {
-  res.json({ message: "Bienvenue sur l'API Around Activities" })
-})
+app.use(cors())
+app.use(express.json())
 
-/*preparations des routes pour mes devs*/
+// Routes
 app.use('/api/auth', authRoutes)
-app.use('/api/users', userRoutes)
-app.use('/api/activities', activityRoutes)
 app.use('/api/groups', groupRoutes)
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`Serveur démarré sur le port ${process.env.PORT || 5000}`);
-});
 
+const PORT = process.env.PORT || 5000
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`)
+})
