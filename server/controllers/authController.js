@@ -1,30 +1,31 @@
 import * as authService from "../services/authService.js"
 
+// Register
 const register = async (req, res, next) => {
   try {
-    const { prénom, Nom, Email, mot_de_passe, confirmer_le_mot_de_passe, ville } = req.body
+    const { firstName, lastName, email, password, confirmPassword, city } = req.body
 
-    if (!prénom || !Nom || !Email || !mot_de_passe || !confirmer_le_mot_de_passe || !ville) {
-      return res.status(400).json({ message: "Tous les champs sont obligatoires" })
+    if (!firstName || !lastName || !email || !password || !confirmPassword || !city) {
+      return res.status(400).json({ message: "All fields are required" })
     }
 
-    const result = await authService.register({ prénom, Nom, Email, mot_de_passe, confirmer_le_mot_de_passe, ville })
+    const result = await authService.register({ firstName, lastName, email, password, confirmPassword, city })
     res.status(201).json(result)
   } catch (error) {
     next(error)
   }
 }
-// Connexion
+
+// Login
 const login = async (req, res, next) => {
   try {
-    const { Email, mot_de_passe } = req.body
+    const { email, password } = req.body
 
-    // Vérifier que les champs sont remplis
-    if (!Email || !mot_de_passe) {
-      return res.status(400).json({ message: "Email et mot de passe obligatoires" })
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" })
     }
 
-    const result = await authService.login({ Email, mot_de_passe })
+    const result = await authService.login({ email, password })
     res.status(200).json(result)
   } catch (error) {
     next(error)
@@ -32,4 +33,3 @@ const login = async (req, res, next) => {
 }
 
 export default { register, login }
-
