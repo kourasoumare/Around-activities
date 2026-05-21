@@ -20,6 +20,11 @@ app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/activities', activityRoutes)
 app.use('/api/groups', groupRoutes)
+
+app.use((err, req, res, next) => {
+  const status = err.statusCode || 500
+  res.status(status).json({ message: err.message })
+})
 app.listen(process.env.PORT || 5000, () => {
   console.log(`Serveur démarré sur le port ${process.env.PORT || 5000}`);
 });
