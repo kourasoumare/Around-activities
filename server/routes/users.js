@@ -1,8 +1,12 @@
 import express from 'express'
-import authenticate from "../middleware/authicate.js"
 import userControllers from '../controllers/userController.js'
+import { verifyToken } from '../middleware/auth.js'
+
+
 const router = express.Router()
-router.get("/me/groups", authenticate, userControllers.getMyGroups)
+
+router.get("/me/groups",verifyToken, userControllers.getMyGroups)
+router.get('/:id', verifyToken, userControllers.getUserById)
+router.put('/me', verifyToken, userControllers.updateMe)
+
 export default router
-
-

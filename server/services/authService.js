@@ -2,7 +2,7 @@ import prisma from "../config/prisma.js"
 import { hashPassword, comparePasswords } from "../utils/passwords.js"
 import { generateToken } from "../utils/token.js"
 
-export const register = async ({ firstName, lastName, email, password, confirmPassword, city }) => {
+export const register = async ({ firstName, lastName, email, password, confirmPassword, city, origin }) => {
 
   // Check passwords match
   if (password !== confirmPassword) {
@@ -32,7 +32,8 @@ export const register = async ({ firstName, lastName, email, password, confirmPa
       last_name: lastName,
       email,
       password: hashedPassword,
-      city
+      city,
+      origin
     }
   })
 
