@@ -4,7 +4,13 @@ import { generateToken } from "../utils/token.js"
 import crypto from "crypto"
 import nodemailer from "nodemailer"
 
+<<<<<<< HEAD
 export const register = async ({ firstName, lastName, email, password, confirmPassword, city }) => {
+=======
+export const register = async ({ firstName, lastName, email, password, confirmPassword, city, origin }) => {
+
+  // Check passwords match
+>>>>>>> develop
   if (password !== confirmPassword) {
     const error = new Error("Passwords do not match")
     error.statusCode = 400
@@ -29,7 +35,8 @@ export const register = async ({ firstName, lastName, email, password, confirmPa
       last_name: lastName,
       email,
       password: hashedPassword,
-      city
+      city,
+      origin
     }
   })
 

@@ -17,6 +17,9 @@ app.use(express.json())
 // Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/groups', groupRoutes)
+app.use('/api/users', userRoutes)
+app.use('/api/activities', activityRoutes)
+
 
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500
