@@ -11,3 +11,37 @@ export const getMyGroups = async (userId) => {
 }
   return groups
 }
+export const getUserById = async (id) => {
+    const user = await prisma.users.findUnique({
+        where: { id: parseInt(id) },
+        select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            city: true,
+            origin: true,
+            avatar_url: true,
+            created_at: true
+        }
+    })
+    if (!user) throw new Error('User not found')
+    return user
+}
+
+export const updateMe = async (id, data) => {
+    const { first_name, last_name, city, origin, avatar_url } = data
+    const user = await prisma.users.update({
+        where: { id: parseInt(id) },
+        data: { first_name, last_name, city, origin, avatar_url },
+        select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            city: true,
+            origin: true,
+            avatar_url: true
+        }
+    })
+    return user
+}
