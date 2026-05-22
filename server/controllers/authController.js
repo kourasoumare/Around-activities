@@ -3,13 +3,13 @@ import * as authService from "../services/authService.js"
 // Register
 const register = async (req, res, next) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword, city } = req.body
+    const { firstName, lastName, email, password, confirmPassword, city, origin } = req.body
 
     if (!firstName || !lastName || !email || !password || !confirmPassword || !city) {
       return res.status(400).json({ message: "All fields are required" })
     }
 
-    const result = await authService.register({ firstName, lastName, email, password, confirmPassword, city })
+    const result = await authService.register({ firstName, lastName, email, password, confirmPassword, city, origin })
     res.status(201).json(result)
   } catch (error) {
     next(error)
