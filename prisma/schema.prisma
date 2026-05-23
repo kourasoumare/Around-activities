@@ -45,19 +45,21 @@ model memberships {
 }
 
 model users {
-  id              Int               @id @default(autoincrement())
-  first_name      String            @db.VarChar(100)
-  last_name       String            @db.VarChar(100)
-  email           String            @unique @db.VarChar(255)
-  password        String            @db.VarChar(255)
-  city            String?           @db.VarChar(100)
-  origin          String?           @db.VarChar(100)
-  avatar_url      String?           @db.VarChar(255)
-  is_new_user     Boolean?          @default(true)
-  created_at      DateTime?         @default(now()) @db.Timestamp(6)
-  groups          groups[]
-  memberships     memberships[]
-  users_interests users_interests[]
+  id                 Int               @id @default(autoincrement())
+  first_name         String            @db.VarChar(100)
+  last_name          String            @db.VarChar(100)
+  email              String            @unique @db.VarChar(255)
+  password           String            @db.VarChar(255)
+  city               String?           @db.VarChar(100)
+  origin             String?           @db.VarChar(100)
+  avatar_url         String?           @db.VarChar(255)
+  is_new_user        Boolean?          @default(true)
+  created_at         DateTime?         @default(now()) @db.Timestamp(6)
+  reset_token        String?
+  reset_token_expiry DateTime?
+  groups             groups[]
+  memberships        memberships[]
+  users_interests    users_interests[]
 }
 
 model users_interests {
