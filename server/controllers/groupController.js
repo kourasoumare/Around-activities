@@ -69,3 +69,53 @@ export const joinGroup = async (req, res) => {
     res.status(500).json({ error: 'Server error' })
   }
 }
+export const deleteGroup = async (req, res) => {
+  try {
+    const groupId = parseInt(req.params.id)
+    const userId = req.user.id
+
+    const group = await prisma.groups.findUnique({ where: { id: groupId } })
+    if (!group) return res.status(404).json({ error: 'Group not found' })
+
+    if (group.creator_id !== userId) {
+      return res.status(403).json({ error: 'Only the creator can delete this group' })
+    }
+
+    await prisma.memberships.deleteMany({ where: { group_id: groupId } })
+    await prisma.groups.delete({ where: { id: groupId } })
+
+    res.status(200).json({ message: 'Group deleted successfully' })
+
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
+
+export const leaveGroup = async (req, res) => {
+  try {
+    const groupId = parseInt(req.params.id)
+    const userId = req.user.id
+
+    const membership = await prisma.memberships.findFirst({
+      where: { group_id: groupId, user_id: userId }
+    })
+    if (!membership) return res.status(400).json({ error: 'You are not a member of this group' })
+
+    const group = await prisma.groups.findUnique({ where: { id: groupId } })
+    if (group.creator_id === userId) {
+      return res.status(400).json({ error: 'You are the creator, delete the group instead.' })
+    }
+
+    await prisma.memberships.deleteMany({
+      where: { group_id: groupId, user_id: userId }
+    })
+
+    res.status(200).json({ message: 'Successfully left the group' })
+
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
+
