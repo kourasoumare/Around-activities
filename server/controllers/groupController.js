@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js'
+import { getGroupByIdService } from '../services/groupService.js'
 
 export const createGroup = async (req, res) => {
   try {
@@ -67,5 +68,15 @@ export const joinGroup = async (req, res) => {
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Server error' })
+  }
+}
+export const getGroupById = async (req, res) => {
+  try {
+    const group = await getGroupByIdService(req.params.id)
+    if (!group) return res.status(404).json({ error: 'Groupe introuvable' })
+    res.json(group)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Erreur serveur' })
   }
 }
