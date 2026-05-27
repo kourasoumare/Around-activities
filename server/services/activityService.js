@@ -6,20 +6,38 @@ export const getActivities = async (city, category) => {
     if (city) where.city = city
     if (category) where.category = category
 
-    const activities = await prisma.activities.findMany({ where })
+    const activities = await prisma.activities.findMany({
+      where,
+      include: {
+        _count: {
+          select: { groups: true }
+        }
+      }
+    })
     return activities
   } catch (error) {
     throw new Error(error.message)
   }
 }
 
-
 export const getActivityById = async (id) => {
   try {
     const activity = await prisma.activities.findUnique({
       where: { id: parseInt(id) },
       include: {
-        groups: true
+        groups: {
+          include: {
+           users: {
+            select: {
+             id: true,
+             first_name: true,
+             last_name: true,
+             avatar_url: true
+  }
+},
+             memberships: true
+  }
+}
       }
     })
     return activity
