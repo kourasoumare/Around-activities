@@ -18,3 +18,33 @@ export const createGroupService = async (groupData, userId) => {
 
   return group
 }
+
+export const getGroupByIdService = async (id) => {
+  const group = await prisma.groups.findUnique({
+    where: { id: parseInt(id) },
+    include: {
+      users: {
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          avatar_url: true
+        }
+      },
+      memberships: {
+        include: {
+          users: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              avatar_url: true
+            }
+          }
+        }
+      },
+      activities: true
+    }
+  })
+  return group
+}

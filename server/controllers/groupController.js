@@ -127,3 +127,13 @@ export const leaveGroup = async (req, res) => {
     res.status(500).json({ error: 'Server error' })
   }
 }
+export const getGroupById = async (req, res) => {
+  try {
+    const group = await getGroupByIdService(req.params.id)
+    if (!group) return res.status(404).json({ error: 'Groupe introuvable' })
+    res.json(group)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Erreur serveur' })
+  }
+}
