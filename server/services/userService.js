@@ -31,7 +31,6 @@ export const getUserById = async (id) => {
     }
   })
   if (!user) throw new Error('User not found')
-
   return {
     ...user,
     interests: user.users_interests.map(i => i.interest)
