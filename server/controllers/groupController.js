@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js'
+import { getGroupByIdService } from '../services/groupService.js'
 
 export const createGroup = async (req, res) => {
   try {
@@ -35,7 +36,6 @@ export const createGroup = async (req, res) => {
     })
 
     res.status(201).json({ message: 'Groupe créé avec succès', group })
-
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Erreur serveur' })
@@ -63,12 +63,23 @@ export const joinGroup = async (req, res) => {
     })
 
     res.status(201).json({ message: 'Successfully joined the group' })
-
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Server error' })
   }
 }
+
+export const getGroupById = async (req, res) => {
+  try {
+    const group = await getGroupByIdService(req.params.id)
+    if (!group) return res.status(404).json({ error: 'Groupe introuvable' })
+    res.json(group)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Erreur serveur' })
+  }
+}
+
 export const deleteGroup = async (req, res) => {
   try {
     const groupId = parseInt(req.params.id)
@@ -85,7 +96,6 @@ export const deleteGroup = async (req, res) => {
     await prisma.groups.delete({ where: { id: groupId } })
 
     res.status(200).json({ message: 'Group deleted successfully' })
-
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Server error' })
@@ -112,10 +122,8 @@ export const leaveGroup = async (req, res) => {
     })
 
     res.status(200).json({ message: 'Successfully left the group' })
-
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Server error' })
   }
 }
-
