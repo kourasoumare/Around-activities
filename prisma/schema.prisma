@@ -53,6 +53,8 @@ model users {
   city               String?           @db.VarChar(100)
   origin             String?           @db.VarChar(100)
   avatar_url         String?           @db.VarChar(255)
+  birth_date         DateTime?         @db.Date
+  language           String?           @db.VarChar(100)
   is_new_user        Boolean?          @default(true)
   created_at         DateTime?         @default(now()) @db.Timestamp(6)
   reset_token        String?

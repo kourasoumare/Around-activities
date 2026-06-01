@@ -4,7 +4,7 @@ import { generateToken } from "../utils/token.js"
 import crypto from "crypto"
 import nodemailer from "nodemailer"
 
-export const register = async ({ firstName, lastName, email, password, confirmPassword, city, origin }) => {
+export const register = async ({ firstName, lastName, email, password, confirmPassword, city, origin, birthDate }) => {
 
   // Check passwords match
   if (password !== confirmPassword) {
@@ -32,7 +32,8 @@ export const register = async ({ firstName, lastName, email, password, confirmPa
       email,
       password: hashedPassword,
       city,
-      origin
+      origin,
+      ...(birthDate ? { birth_date: new Date(birthDate) } : {})
     }
   })
 
