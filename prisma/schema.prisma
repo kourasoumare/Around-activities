@@ -33,6 +33,7 @@ model groups {
   activities   activities?   @relation(fields: [activity_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users        users?        @relation(fields: [creator_id], references: [id], onUpdate: NoAction)
   memberships  memberships[]
+  messages     messages[]
 }
 
 model memberships {
@@ -45,23 +46,27 @@ model memberships {
 }
 
 model users {
-  id                 Int               @id @default(autoincrement())
-  first_name         String            @db.VarChar(100)
-  last_name          String            @db.VarChar(100)
-  email              String            @unique @db.VarChar(255)
-  password           String            @db.VarChar(255)
-  city               String?           @db.VarChar(100)
-  origin             String?           @db.VarChar(100)
-  avatar_url         String?           @db.VarChar(255)
-  birth_date         DateTime?         @db.Date
-  language           String?           @db.VarChar(100)
-  is_new_user        Boolean?          @default(true)
-  created_at         DateTime?         @default(now()) @db.Timestamp(6)
-  reset_token        String?
-  reset_token_expiry DateTime?
-  groups             groups[]
-  memberships        memberships[]
-  users_interests    users_interests[]
+  id                        Int               @id @default(autoincrement())
+  first_name                String            @db.VarChar(100)
+  last_name                 String            @db.VarChar(100)
+  email                     String            @unique @db.VarChar(255)
+  password                  String            @db.VarChar(255)
+  city                      String?           @db.VarChar(100)
+  origin                    String?           @db.VarChar(100)
+  avatar_url                String?           @db.VarChar(255)
+  birth_date                DateTime?         @db.Date
+  language                  String?           @db.VarChar(100)
+  is_new_user               Boolean?          @default(true)
+  created_at                DateTime?         @default(now()) @db.Timestamp(6)
+  reset_token               String?
+  reset_token_expiry        DateTime?
+  groups                    groups[]
+  memberships               memberships[]
+  users_interests           users_interests[]
+  friendships_as_requester  friendships[]     @relation("requester")
+  friendships_as_receiver   friendships[]     @relation("receiver")
+  sent_messages             messages[]        @relation("sender")
+  received_messages         messages[]        @relation("receiver_msg")
 }
 
 model users_interests {
@@ -69,4 +74,26 @@ model users_interests {
   user_id  Int?
   interest String @db.VarChar(100)
   users    users? @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  }
+}
+
+model friendships {
+  id           Int      @id @default(autoincrement())
+  requester_id Int
+  receiver_id  Int
+  status       String   @default("pending")
+  created_at   DateTime @default(now())
+  requester    users    @relation("requester", fields: [requester_id], references: [id])
+  receiver     users    @relation("receiver", fields: [receiver_id], references: [id])
+}
+
+model messages {
+  id          Int      @id @default(autoincrement())
+  sender_id   Int
+  group_id    Int?
+  receiver_id Int?
+  content     String
+  created_at  DateTime @default(now())
+  sender      users    @relation("sender", fields: [sender_id], references: [id])
+  group       groups?  @relation(fields: [group_id], references: [id])
+  receiver    users?   @relation("receiver_msg", fields: [receiver_id], references: [id])
+}

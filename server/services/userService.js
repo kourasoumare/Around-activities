@@ -1,20 +1,17 @@
 import prisma from "../config/prisma.js"
 
 export const getMyGroups = async (userId) => {
-  const groups = await prisma.memberships.findMany({
+  const memberships = await prisma.memberships.findMany({
     where: { user_id: userId },
     include: {
       groups: {
         include: {
-          activities: {
-            select: { id: true, title: true, category: true }
-          }
+          activities: { select: { id: true, title: true, category: true } }
         }
       }
     }
   })
-  // Retourne toujours un tableau, même vide
-  return groups
+  return memberships.map(m => m.groups).filter(Boolean)
 }
 
 export const getUserById = async (id) => {
@@ -30,14 +27,11 @@ export const getUserById = async (id) => {
       birth_date: true,
       language: true,
       created_at: true,
-      users_interests: {
-        select: { interest: true }
-      }
+      users_interests: { select: { interest: true } }
     }
   })
   if (!user) throw new Error('User not found')
 
-  // Transformer users_interests en tableau simple
   return {
     ...user,
     interests: user.users_interests.map(i => i.interest)
@@ -45,17 +39,19 @@ export const getUserById = async (id) => {
 }
 
 export const updateMe = async (id, data) => {
-  const { first_name, last_name, city, origin, avatar_url, birth_date, language } = data
+  const userId = parseInt(id)
+  const { firstName, lastName, city, origin, birthDate, language, avatar_url, interests } = data
+
   const user = await prisma.users.update({
-    where: { id: parseInt(id) },
+    where: { id: userId },
     data: {
-      first_name,
-      last_name,
-      city,
-      origin,
-      avatar_url,
-      language,
-      ...(birth_date ? { birth_date: new Date(birth_date) } : {})
+      ...(firstName !== undefined && { first_name: firstName }),
+      ...(lastName !== undefined && { last_name: lastName }),
+      ...(city !== undefined && { city }),
+      ...(origin !== undefined && { origin }),
+      ...(avatar_url !== undefined && { avatar_url }),
+      ...(language !== undefined && { language }),
+      ...(birthDate ? { birth_date: new Date(birthDate) } : {})
     },
     select: {
       id: true,
@@ -66,8 +62,19 @@ export const updateMe = async (id, data) => {
       origin: true,
       avatar_url: true,
       birth_date: true,
-      language: true
+      language: true,
+      is_new_user: true
     }
   })
+
+  if (interests && Array.isArray(interests)) {
+    await prisma.users_interests.deleteMany({ where: { user_id: userId } })
+    if (interests.length > 0) {
+      await prisma.users_interests.createMany({
+        data: interests.map(interest => ({ user_id: userId, interest }))
+      })
+    }
+  }
+
   return user
 }

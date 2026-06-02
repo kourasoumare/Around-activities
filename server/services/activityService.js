@@ -1,47 +1,34 @@
 import prisma from '../config/prisma.js'
 
 export const getActivities = async (city, category) => {
-  try {
-    const where = {}
-    if (city) where.city = city
-    if (category) where.category = category
+  const where = {}
+  if (city) where.city = city
+  if (category) where.category = category
 
-    const activities = await prisma.activities.findMany({
-      where,
-      include: {
-        _count: {
-          select: { groups: true }
-        }
-      }
-    })
-    return activities
-  } catch (error) {
-    throw new Error(error.message)
-  }
+  return await prisma.activities.findMany({
+    where,
+    include: { _count: { select: { groups: true } } }
+  })
 }
 
 export const getActivityById = async (id) => {
-  try {
-    const activity = await prisma.activities.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        groups: {
-          include: {
-           users: {
-            select: {
-             id: true,
-             first_name: true,
-             last_name: true,
-             avatar_url: true
-  }
-},
-             memberships: true
-  }
-}
+  const activity = await prisma.activities.findUnique({
+    where: { id: parseInt(id) },
+    include: {
+      groups: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          meeting_date: true,
+          location: true,
+          max_members: true,
+          contact_link: true,
+          creator_id: true,
+          _count: { select: { memberships: true } }
+        }
       }
-    })
-    return activity
-  } catch (error) {
-    throw new Error(error.message)
-  }
+    }
+  })
+  return activity
 }
