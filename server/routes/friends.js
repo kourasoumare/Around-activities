@@ -1,21 +1,21 @@
-import express from 'express'
+import { Router } from 'express'
 import { verifyToken } from '../middleware/auth.js'
 import {
   sendFriendRequest,
   acceptFriendRequest,
   refuseFriendRequest,
-  getFriends,
-  getFriendRequests,
+  getFriendsList,
+  getPendingRequests,
   getFriendshipStatus
 } from '../controllers/friendshipController.js'
 
-const router = express.Router()
+const router = Router()
 
-router.get('/', verifyToken, getFriends)
-router.get('/requests', verifyToken, getFriendRequests)
-router.get('/status/:userId', verifyToken, getFriendshipStatus)
 router.post('/request/:userId', verifyToken, sendFriendRequest)
 router.put('/accept/:requestId', verifyToken, acceptFriendRequest)
 router.put('/refuse/:requestId', verifyToken, refuseFriendRequest)
+router.get('/', verifyToken, getFriendsList)
+router.get('/requests', verifyToken, getPendingRequests)
+router.get('/status/:userId', verifyToken, getFriendshipStatus)
 
 export default router

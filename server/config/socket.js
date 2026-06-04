@@ -1,4 +1,15 @@
-let _io = null
+import { Server } from 'socket.io'
 
-export const setIo = (io) => { _io = io }
-export const getIo = () => _io
+let io = null
+
+export const initSocket = (httpServer) => {
+  io = new Server(httpServer, {
+    cors: {
+      origin: 'http://localhost:3000',
+      credentials: true
+    }
+  })
+  return io
+}
+
+export const getIO = () => io

@@ -1,248 +1,249 @@
 # Around Activities
 
-## 1) Problème
+> **Le réseau social des expériences partagées — pensé pour ceux qui veulent rencontrer de vraies personnes, pas juste scroller.**
 
-- Segment cible : nouveaux arrivants en France, 
-  étudiants étrangers, jeunes qui viennent de déménager
+---
 
-- Problème : quand on arrive dans une nouvelle ville, 
-  on ne sait ni quoi faire, ni avec qui le faire. 
-  On peut vite se sentir seul et s'ennuyer.
+## Le problème
 
-- Exemple concret : un étudiant étranger arrive à Paris 
-  en septembre. Il ne connaît personne. Il veut sortir 
-  mais ne sait pas quoi faire ni comment rencontrer 
-  des gens partageant ses intérêts.
+Chaque année en France, des centaines de milliers de personnes — nouveaux arrivants, étudiants étrangers, jeunes qui déménagent — se retrouvent dans une nouvelle ville sans réseau social. Elles ont envie de sortir, de faire des activités, de rencontrer du monde. Mais elles ne savent ni quoi faire, ni avec qui le faire.
 
-- Solutions actuelles + limites :
-  - Google → donne des idées d'activités mais pas de 
-    compagnons pour les faire
-  - Meetup → trop formel, pas adapté aux jeunes
-  - Facebook Groups → trop généraliste, peu rassurant 
-    pour un nouvel arrivant
+Les solutions existantes ne répondent pas vraiment à ce besoin :
+- **Google** donne des idées d'activités mais pas de compagnons pour les faire
+- **Meetup** est trop formel et peu adapté aux jeunes
+- **Facebook Groups** est trop généraliste et peu rassurant pour un nouvel arrivant
 
-## 2) Proposition de valeur
+**Around Activities** comble ce vide : une plateforme pensée pour créer du lien social naturellement, autour d'activités et de centres d'intérêt communs.
 
-- En une phrase : Around Activities permet aux nouveaux 
-  arrivants en France de trouver des sorties qui matchent 
-  avec leur génération et leurs centres d'intérêts, 
-  et de les faire en groupe pour rencontrer des personnes 
-  facilement et naturellement.
+---
 
-- Différenciation (vs alternatives) :
-  - Contrairement à Google → on ne trouve pas juste 
-    une activité, on trouve des gens avec qui la faire
-  - Contrairement à Meetup → le parcours est simple, 
-    guidé et pensé pour les jeunes
-  - Contrairement à Facebook Groups → l'app est 
-    entièrement dédiée aux sorties en groupe, 
-    pas noyée dans un réseau social généraliste
-  - Notre vrai plus : l'utilisateur n'a pas besoin 
-    de savoir quoi chercher, les catégories lui donnent 
-    des idées selon ses centres d'intérêts 
-    et le groupe fait le reste
+## La solution
 
-## 3) MVP (périmètre 2 mois)
+Around Activities permet aux utilisateurs de :
+- **Découvrir** des catégories d'activités (Sport, Art, Cuisine, Musique, etc.)
+- **Rejoindre** des groupes existants créés par d'autres membres
+- **Créer** leurs propres groupes et organiser des sorties
+- **Rencontrer** des personnes qui partagent leurs centres d'intérêt
+- **Communiquer** en temps réel via le chat de groupe ou en privé avec leurs amis
 
-### Inclus
-- Inscription / Connexion
-- Profil utilisateur simple (nom, ville, date de création)
-- Parcourir les sorties par catégorie
-- Voir le détail d'une sortie (titre, description, 
-  lieu, date, nombre de participants, organisateur)
-- Rejoindre une sortie existante
-- Créer sa propre sortie (catégorie, titre, 
-  description, lieu, date, nombre max de participants)
-- Voir la liste des membres d'une sortie
+---
 
-### Exclu (fonctionnalités futures)
-- Messagerie entre membres
-- Notifications
-- Carte interactive
-- Recommandations personnalisées par algorithme
-- Système de commentaires
-- Système de signalement
-- Favoris
-- Sortie en solo
-- Système d'avatar personnalisé
-- Centres d'intérêts sur le profil
-- Modifier une sortie après création
-- Proposer des lieux spécifiques (cinémas, restaurants...) 
-  avec redirection vers réservation selon le type de lieu
-  (intégration Google Places API)
-- Signaler à l'utilisateur quand deux de ses sorties 
-  tombent le même jour
+## Fonctionnalités
 
-## 4) Architecture (vue d'ensemble)
+### Authentification
+- Inscription avec prénom, nom, email, mot de passe, ville, pays d'origine, date de naissance
+- Connexion sécurisée avec JWT
+- Mot de passe oublié avec réinitialisation par email (Brevo/Nodemailer)
 
-Frontend (React) → Backend (Node.js / Express) → 
-Base de données (MySQL)
+### Onboarding
+- Parcours en 3 étapes après inscription : ville → langue(s) parlée(s) → centres d'intérêt
+- Sauvegarde en base de données
 
-- Frontend : interface utilisateur, navigation entre 
-  les pages, appels API
-  
-- Backend : logique métier, validation des données, 
-  gestion de l'authentification, accès à la base 
-  de données
-  
-- Base de données : stockage des utilisateurs, 
-  des sorties et des membres
+### Exploration
+- 8 catégories d'activités : Sport & Fitness, Art & Culture, Restaurant & Cuisine, Musique & Événements, Bien-être & Détente, Tech & Jeux vidéo, Nature & Plein air, Rencontres & Chill
+- Affichage du nombre de groupes disponibles par catégorie
+- Liste des groupes avec date, lieu, nombre de membres
 
-Outils et technologies :
-- Frontend : React, React Router, Tailwind CSS, Axios
-- Backend : Node.js, Express, à compléter
-- Base de données : MySQL, à compléter
-- Déploiement : à compléter
+### Groupes
+- Créer un groupe dans une catégorie
+- Rejoindre / Quitter un groupe
+- Supprimer son groupe (créateur uniquement)
+- Voir les membres d'un groupe avec lien vers leur profil
 
-## 5) Modèle de données (v0)
+### Profil utilisateur
+- Affichage : ville, pays d'origine, âge, langue(s) parlée(s), centres d'intérêt, groupes
+- Modification du profil (tous les champs)
+- Profil public consultable par les autres membres
 
-- User : id, nom, email, mot de passe, ville, 
-  date de création
+### Système d'amis
+- Envoyer / Accepter / Refuser une demande d'ami
+- Notification en temps réel à la réception d'une demande
+- Liste des amis dans la page Conversations
 
-- Activity : id, titre, description, catégorie, 
-  lieu, date, nombre maximum de participants, 
-  date de création, id de l'organisateur (→ User)
+### Messagerie temps réel (Socket.IO)
+- Chat de groupe : tous les membres d'un groupe peuvent communiquer
+- Chat privé : entre deux amis
+- Historique des messages persisté en base de données
+- Auto-scroll et déduplication des messages
 
-- Participation : id, id de l'utilisateur (→ User), 
-  id de la sortie (→ Activity), date d'inscription
+---
 
-Relations :
-- 1 User peut créer plusieurs Activity (1:N)
-- 1 User peut rejoindre plusieurs Activity (N:N)
-- 1 Activity peut avoir plusieurs participants (N:N)
-- La table Participation gère la relation N:N 
-  entre User et Activity
-
-## 6) Routes API (v0)
-
-Auth :
-- POST /api/auth/register → créer un compte
-- POST /api/auth/login    → se connecter
-
-Utilisateurs :
-- GET /api/users/:id      → voir le profil d'un utilisateur
-- PUT /api/users/:id      → modifier mon profil
-
-Sorties :
-- GET /api/activities        → voir toutes les sorties
-- POST /api/activities       → créer une sortie
-- GET /api/activities/:id    → voir le détail d'une sortie
-- DELETE /api/activities/:id → supprimer une sortie
-
-Participations :
-- POST /api/activities/:id/join    → rejoindre une sortie
-- DELETE /api/activities/:id/leave → se retirer d'une sortie
-
-## 7) Logique métier (v0)
-
-Règles sur les sorties :
-- Une sortie ne peut être supprimée que par 
-  son organisateur
-- Une sortie doit avoir obligatoirement : un titre, 
-  une catégorie, un lieu, une date et un nombre 
-  maximum de participants
-- Une sortie ne peut pas avoir une date dans le passé
-- Une sortie doit avoir au minimum 2 participants 
-  maximum (sinon c'est une sortie solo)
-
-Règles sur les participations :
-- Un utilisateur peut rejoindre une sortie uniquement 
-  si le nombre maximum de participants n'est pas atteint
-- Un utilisateur ne peut pas rejoindre sa propre sortie 
-  car il en est déjà l'organisateur
-- Un utilisateur peut rejoindre plusieurs sorties 
-  en même temps
-- Un utilisateur peut se retirer d'une sortie 
-  quand il veut
-- Un organisateur ne peut pas se retirer de 
-  sa propre sortie
-
-Règles sur les comptes :
-- Un email ne peut pas être utilisé deux fois
-- Un utilisateur doit être connecté pour créer 
-  ou rejoindre une sortie
-
-Fonctionnalité future :
-- Signaler à l'utilisateur quand deux de ses sorties 
-  tombent le même jour et lui proposer d'en annuler 
-  une ou de garder les deux
-
-## 8) Installation (à compléter quand le code existe)
+## Stack technique
 
 ### Frontend
-- à compléter
+- **Next.js 15** (App Router, TypeScript)
+- **Tailwind CSS** + variables CSS custom
+- **Socket.IO Client** pour la messagerie temps réel
+- Polices : Playfair Display (titres) + DM Sans (body)
 
 ### Backend
-- à compléter
+- **Node.js** + **Express.js**
+- **Prisma ORM** (v7)
+- **PostgreSQL**
+- **Socket.IO** pour la messagerie temps réel
+- **JWT** pour l'authentification
+- **bcrypt** pour le hashage des mots de passe
+- **Nodemailer** + **Brevo** pour les emails
 
-## 9) Roadmap 2 mois
+### Déploiement
+- **Coolify** + **Docker**
 
-### Semaine 1-2 : Mise en place
-- Initialisation du repo GitHub
-- Structure des dossiers
-- Documentation complète (README, modèles, routes)
-- Maquettes des pages sur Figma
-- Setup frontend React + backend Node.js
-- Connexion base de données MySQL
+---
 
-### Semaine 3-4 : Authentification
-- Inscription et connexion utilisateur
-- Profil utilisateur
-- Protection des routes privées
+## Modèle de données
 
-### Semaine 5-6 : Fonctionnalités principales
-- Affichage des sorties par catégorie
-- Détail d'une sortie
-- Créer une sortie
-- Rejoindre / se retirer d'une sortie
-- Affichage des membres d'une sortie
+| Table | Description |
+|-------|-------------|
+| `users` | Utilisateurs (infos profil, auth) |
+| `activities` | Catégories d'activités (8 catégories fixes) |
+| `groups` | Groupes créés par les utilisateurs |
+| `memberships` | Relation utilisateur ↔ groupe |
+| `users_interests` | Centres d'intérêt des utilisateurs |
+| `friendships` | Demandes et relations d'amitié |
+| `messages` | Messages de groupe et messages privés |
 
-### Semaine 7 : Intégration et tests
-- Connexion frontend + backend
-- Tests de toutes les fonctionnalités
-- Correction des bugs
+---
 
-### Semaine 8 : Finalisation
-- Design final et responsive mobile
-- Déploiement
-- Préparation de la présentation
+## Routes API
 
-## 10) Conventions d'équipe
+### Auth
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| POST | `/api/auth/register` | Inscription |
+| POST | `/api/auth/login` | Connexion |
+| POST | `/api/auth/forgot-password` | Mot de passe oublié |
+| POST | `/api/auth/reset-password` | Réinitialisation |
 
-### Répartition des rôles
-- Membre 1 (chef de projet) : Backend + Base de données 
-  + pilotage de l'équipe
-- Membre 2 : Backend + Base de données
-- Membre 3 : Frontend
-- Membre 4 : Frontend
+### Utilisateurs
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| GET | `/api/users/:id` | Voir un profil |
+| PUT | `/api/users/me` | Modifier mon profil |
+| GET | `/api/users/me/groups` | Mes groupes |
 
-### Convention de branches
-- main        → version stable et fonctionnelle
-- dev         → branche de développement principale
-- feat/nom    → nouvelle fonctionnalité 
-  (ex: feat/login, feat/create-activity)
-- fix/nom     → correction de bug
-  (ex: fix/join-activity)
+### Activités
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| GET | `/api/activities` | Liste des catégories |
+| GET | `/api/activities/:id` | Détail avec ses groupes |
 
-### Convention de commits
-- feat:     nouvelle fonctionnalité
-- fix:      correction de bug
-- docs:     documentation
-- chore:    configuration, structure
-- refactor: amélioration du code sans changer 
-            le comportement
+### Groupes
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| POST | `/api/groups` | Créer un groupe |
+| GET | `/api/groups/:id` | Détail d'un groupe |
+| POST | `/api/groups/:id/join` | Rejoindre |
+| DELETE | `/api/groups/:id/leave` | Quitter |
+| DELETE | `/api/groups/:id` | Supprimer |
 
-Exemples :
-- feat: add login page
-- fix: correct join activity bug
-- docs: update README
+### Amis
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| POST | `/api/friends/request/:userId` | Envoyer une demande |
+| PUT | `/api/friends/accept/:requestId` | Accepter |
+| PUT | `/api/friends/refuse/:requestId` | Refuser |
+| GET | `/api/friends` | Liste d'amis |
+| GET | `/api/friends/requests` | Demandes reçues |
+| GET | `/api/friends/status/:userId` | Statut avec un user |
 
-### Règles de merge
-- On ne merge jamais directement sur main
-- On passe toujours par dev d'abord
-- On relit le code d'un autre avant de merger
+### Messages
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| GET | `/api/messages/group/:groupId` | Messages d'un groupe |
+| GET | `/api/messages/private/:userId` | Messages privés |
+| POST | `/api/messages` | Envoyer un message |
 
-### Points d'équipe
-- 2 fois par semaine (30 minutes)
-- Chacun dit ce qu'il a fait et ce qu'il va faire
-- On signale les blocages pour s'entraider
+---
+
+## Installation
+
+### Prérequis
+- Node.js v18+
+- PostgreSQL
+- npm
+
+### Backend
+
+```bash
+git clone https://github.com/kourasoumare/Around-activities.git
+cd Around-activities
+npm install
+```
+
+Crée un fichier `.env` à la racine :
+
+```env
+PORT=5000
+DATABASE_URL="postgresql://postgres:VOTRE_MOT_DE_PASSE@localhost:5432/around_activities"
+JWT_SECRET=around_activities_secret_key
+BREVO_USER=votre_email_brevo
+BREVO_PASS=votre_cle_brevo
+FRONTEND_URL=http://localhost:3000
+```
+
+Lance les migrations et démarre :
+
+```bash
+npx prisma migrate deploy
+npx prisma generate
+npm run dev
+```
+
+### Frontend
+
+```bash
+git clone https://github.com/kourasoumare/frontend-Around-Activities-V2.git
+cd frontend-Around-Activities-V2
+npm install
+npm run dev
+```
+
+L'application est accessible sur `http://localhost:3000`
+
+---
+
+## Équipe
+
+| Membre | Rôle |
+|--------|------|
+| **Koura** | Chef de projet · Fullstack (back : profil, amis, messagerie Socket.IO · front : landing, onboarding, conversations, profil) |
+| **Imad** | Frontend |
+| **Bambi** | Backend (authentification, inscription, connexion, mot de passe oublié) |
+| **Faisal** | Backend (création, rejoindre, quitter, supprimer un groupe) |
+
+---
+
+## Vision
+
+Around Activities n'est pas seulement une application d'activités. C'est avant tout une plateforme centrée sur la découverte locale, la socialisation et l'intégration des nouveaux arrivants.
+
+**Prochaines fonctionnalités prévues :**
+- Stories de sorties (photos et récits après une sortie)
+- Carte interactive pour découvrir les activités autour de soi
+- Recommandations personnalisées basées sur les centres d'intérêt
+- Événements locaux et nationaux
+- Système de favoris et de commentaires
+- Système de signalement
+- Notifications push
+- Application mobile
+
+---
+
+## Conventions Git
+
+**Branches :**
+- `main` → version stable en production
+- `develop` → branche de développement principale
+- `feat/nom` → nouvelle fonctionnalité
+- `fix/nom` → correction de bug
+
+**Commits :**
+- `feat:` nouvelle fonctionnalité
+- `fix:` correction de bug
+- `docs:` documentation
+- `chore:` configuration
+- `refactor:` amélioration sans changement de comportement
+
+---
+
+*Projet réalisé dans le cadre du projet intégrateur — HETIC Fast Track 2026*

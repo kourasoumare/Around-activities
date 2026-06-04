@@ -1,28 +1,28 @@
 import 'dotenv/config';
 import express from 'express';
-import http from 'http';
 import cors from 'cors';
-import { Server } from 'socket.io';
-import { verifyToken as verifyJwt } from './utils/token.js';
-import { setIo } from './config/socket.js';
-import { createMessageService } from './services/messageService.js';
+import { createServer } from 'http';
+import { initSocket } from './config/socket.js';
+import jwt from 'jsonwebtoken';
+import prisma from './config/prisma.js';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import activityRoutes from './routes/activities.js';
 import groupRoutes from './routes/groups.js';
 import friendRoutes from './routes/friends.js';
 import messageRoutes from './routes/messages.js';
+import { createMessageService } from './services/messageService.js';
 
 const app = express();
-const httpServer = http.createServer(app);
+const httpServer = createServer(app);
 
-const io = new Server(httpServer, {
-  cors: { origin: 'http://localhost:3000', credentials: true }
-});
+const io = initSocket(httpServer);
 
-setIo(io);
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
@@ -38,47 +38,65 @@ app.use((err, req, res, next) => {
 });
 
 io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) return next(new Error('Token manquant'));
   try {
-    const token = socket.handshake.auth.token;
-    if (!token) return next(new Error('Unauthorized'));
-    const decoded = verifyJwt(token);
-    socket.userId = decoded.id;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.user = decoded;
     next();
   } catch {
-    next(new Error('Unauthorized'));
+    next(new Error('Token invalide'));
   }
 });
 
-io.on('connection', (socket) => {
-  const userId = socket.userId;
+io.on('connection', async (socket) => {
+  const userId = socket.user.id;
+
+  // Auto-join toutes les rooms de groupe du user
+  const memberships = await prisma.memberships.findMany({
+    where: { user_id: userId },
+    select: { group_id: true }
+  });
+  for (const { group_id } of memberships) {
+    socket.join(`group:${group_id}`);
+  }
+
+  // Room privée personnelle (pour recevoir des messages sans join explicite)
   socket.join(`user:${userId}`);
 
-  socket.on('join_group', ({ groupId }) => {
+  socket.on('join_group', (groupId) => {
     socket.join(`group:${groupId}`);
   });
 
-  socket.on('join_private', ({ userId1, userId2 }) => {
-    const room = `private:${[userId1, userId2].sort().join('-')}`;
-    socket.join(room);
-  });
-
-  socket.on('send_message', async ({ content, group_id }) => {
+  socket.on('send_message', async ({ group_id, content }) => {
     try {
-      const message = await createMessageService({ sender_id: userId, group_id: parseInt(group_id), content });
+      const message = await createMessageService({
+        sender_id: userId,
+        group_id: parseInt(group_id),
+        content
+      });
       io.to(`group:${group_id}`).emit('new_message', message);
     } catch (err) {
-      console.error('send_message error:', err.message);
+      socket.emit('error', { message: err.message });
     }
   });
 
-  socket.on('send_private_message', async ({ content, receiver_id }) => {
+  socket.on('join_private', ({ friendId }) => {
+    const roomId = [userId, parseInt(friendId)].sort((a, b) => a - b).join('-');
+    socket.join(`private:${roomId}`);
+  });
+
+  socket.on('send_private_message', async ({ receiver_id, content }) => {
     try {
-      const rid = parseInt(receiver_id);
-      const message = await createMessageService({ sender_id: userId, receiver_id: rid, content });
-      const room = `private:${[userId, rid].sort().join('-')}`;
-      io.to(room).emit('new_private_message', message);
+      const message = await createMessageService({
+        sender_id: userId,
+        receiver_id: parseInt(receiver_id),
+        content
+      });
+      const roomId = [userId, parseInt(receiver_id)].sort((a, b) => a - b).join('-');
+      io.to(`private:${roomId}`).emit('new_private_message', message);
     } catch (err) {
-      console.error('send_private_message error:', err.message);
+      socket.emit('error', { message: err.message });
     }
   });
 });
