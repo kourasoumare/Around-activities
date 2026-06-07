@@ -71,6 +71,7 @@ io.on('connection', async (socket) => {
   socket.on('send_message', async ({ group_id, content }) => {
     try {
       const message = await createMessageService({
+  
         sender_id: userId,
         group_id: parseInt(group_id),
         content
