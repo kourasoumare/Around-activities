@@ -1,25 +1,14 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --production
 
 COPY . .
 
-RUN npm run build
+RUN npx prisma generate
 
-FROM node:20-alpine AS runner
+EXPOSE 5000
 
-WORKDIR /app
-
-ENV NODE_ENV=production
-
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
+CMD ["node", "server/index.js"]
