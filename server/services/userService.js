@@ -78,3 +78,28 @@ export const updateMe = async (id, data) => {
 
   return user
 }
+
+export const getMyActivities = async (userId) => {
+  const joined = await prisma.activity_members.findMany({
+    where: { user_id: userId },
+    include: {
+      activity: {
+        include: {
+          _count: { select: { groups: true, activity_members: true } }
+        }
+      }
+    }
+  })
+
+  const created = await prisma.activities.findMany({
+    where: { creator_id: userId },
+    include: {
+      _count: { select: { groups: true, activity_members: true } }
+    }
+  })
+
+  return {
+    joined: joined.map(m => m.activity),
+    created
+  }
+}

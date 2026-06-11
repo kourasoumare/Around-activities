@@ -40,4 +40,13 @@ const updateMe = async (req, res, next) => {
     }
 }
 
-export default { getMyGroups, getUserById, getMe, updateMe }
+const getMyActivities = async (req, res, next) => {
+  try {
+    const data = await userService.getMyActivities(req.user.id)
+    res.status(200).json(data)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export default { getMyGroups, getUserById, getMe, updateMe, getMyActivities }
