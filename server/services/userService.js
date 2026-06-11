@@ -50,7 +50,8 @@ export const updateMe = async (id, data) => {
       ...(origin !== undefined && { origin }),
       ...(avatar_url !== undefined && { avatar_url }),
       ...(language !== undefined && { language }),
-      ...(birthDate ? { birth_date: new Date(birthDate) } : {})
+      ...(birthDate ? { birth_date: new Date(birthDate) } : {}),
+      ...(interests && Array.isArray(interests) && interests.length > 0 && { is_new_user: false })
     },
     select: {
       id: true,

@@ -22,6 +22,15 @@ const getUserById = async (req, res, next) => {
     }
 }
 
+const getMe = async (req, res, next) => {
+    try {
+        const user = await userService.getUserById(req.user.id)
+        res.status(200).json(user)
+    } catch (error) {
+        next(error)
+    }
+}
+
 const updateMe = async (req, res, next) => {
     try {
         const user = await userService.updateMe(req.user.id, req.body)
@@ -31,4 +40,4 @@ const updateMe = async (req, res, next) => {
     }
 }
 
-export default { getMyGroups, getUserById, updateMe }
+export default { getMyGroups, getUserById, getMe, updateMe }

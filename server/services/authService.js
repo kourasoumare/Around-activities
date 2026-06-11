@@ -18,6 +18,14 @@ const USER_SELECT = {
   created_at: true
 }
 
+const getUserInterests = async (userId) => {
+  const userInterests = await prisma.users_interests.findMany({
+    where: { user_id: userId },
+    select: { interest: true }
+  })
+  return userInterests.map(i => i.interest)
+}
+
 export const register = async ({ firstName, lastName, email, password, confirmPassword, city, origin, birthDate }) => {
   if (password !== confirmPassword) {
     const error = new Error("Passwords do not match")
@@ -48,7 +56,8 @@ export const register = async ({ firstName, lastName, email, password, confirmPa
   })
 
   const token = generateToken(newUser.id)
-  return { message: "Registration successful", user: newUser, token }
+  const interests = await getUserInterests(newUser.id)
+  return { message: "Registration successful", user: { ...newUser, interests }, token }
 }
 
 export const login = async ({ email, password }) => {
@@ -72,7 +81,8 @@ export const login = async ({ email, password }) => {
 
   const token = generateToken(user.id)
   const { password: _, ...userWithoutPassword } = user
-  return { message: "Login successful", user: userWithoutPassword, token }
+  const interests = await getUserInterests(user.id)
+  return { message: "Login successful", user: { ...userWithoutPassword, interests }, token }
 }
 
 export const forgotPassword = async ({ email }) => {
