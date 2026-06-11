@@ -1,7 +1,8 @@
 import {
   getGroupMessagesService,
   getPrivateMessagesService,
-  createMessageService
+  createMessageService,
+  getActivityMessagesService
 } from '../services/messageService.js'
 
 export const getGroupMessages = async (req, res) => {
@@ -39,6 +40,17 @@ export const createMessage = async (req, res) => {
     })
 
     res.status(201).json(message)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: error.message })
+  }
+}
+
+// ── GET /api/messages/activity/:id ────────────────────────────────
+export const getActivityMessagesHandler = async (req, res) => {
+  try {
+    const messages = await getActivityMessagesService(req.params.id)
+    res.json(messages)
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: error.message })

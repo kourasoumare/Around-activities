@@ -37,3 +37,23 @@ export const createMessageService = async ({ sender_id, group_id, receiver_id, c
     include: { sender: senderSelect }
   })
 }
+
+// ── Messages du chat communautaire d'une activité ─────────────────
+export const getActivityMessagesService = async (activityId) => {
+  return prisma.activity_messages.findMany({
+    where: { activity_id: parseInt(activityId) },
+    include: { sender: senderSelect },
+    orderBy: { created_at: 'asc' }
+  })
+}
+
+export const createActivityMessageService = async ({ activity_id, sender_id, content }) => {
+  return prisma.activity_messages.create({
+    data: {
+      activity_id: parseInt(activity_id),
+      sender_id,
+      content
+    },
+    include: { sender: senderSelect }
+  })
+}
