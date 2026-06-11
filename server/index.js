@@ -11,7 +11,7 @@ import activityRoutes from './routes/activities.js';
 import groupRoutes from './routes/groups.js';
 import friendRoutes from './routes/friends.js';
 import messageRoutes from './routes/messages.js';
-import { createMessageService } from './services/messageService.js';
+import { createMessageService, createActivityMessageService } from './services/messageService.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -100,6 +100,25 @@ io.on('connection', async (socket) => {
       socket.emit('error', { message: err.message });
     }
   });
+
+   socket.on('join_activity', (activityId) => {
+    socket.join(`activity:${activityId}`)
+  })
+
+  socket.on('send_activity_message', async ({ activity_id, content }) => {
+    try {
+      const message = await createActivityMessageService({
+        sender_id: userId,
+        activity_id: parseInt(activity_id),
+        content
+      })
+      io.to(`activity:${activity_id}`).emit('new_activity_message', message)
+    } catch (err) {
+      socket.emit('error', { message: err.message })
+    }
+  })
+
+
 });
 
 const PORT = process.env.PORT || 5000;
