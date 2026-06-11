@@ -15,6 +15,10 @@ model activities {
   city        String    @db.VarChar(100)
   image_url   String?   @db.VarChar(255)
   created_at  DateTime? @default(now()) @db.Timestamp(6)
+  creator_id        Int
+  creator           users  @relation("ActivityCreator", fields: [creator_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  activity_members  activity_members[]
+  activity_messages activity_messages[]
   groups      groups[]
 }
 
@@ -67,6 +71,9 @@ model users {
   friendships_received friendships[]     @relation("FriendshipReceiver")
   messages_sent        messages[]        @relation("MessageSender")
   messages_received    messages[]        @relation("MessageReceiver")
+  activities_created     activities[]        @relation("ActivityCreator")
+  activity_members       activity_members[]
+  activity_messages_sent activity_messages[] @relation("ActivityMessageSender")
 }
 
 model users_interests {
@@ -97,3 +104,25 @@ model messages {
   group       groups?  @relation(fields: [group_id], references: [id], onDelete: Cascade)
   receiver    users?   @relation("MessageReceiver", fields: [receiver_id], references: [id], onDelete: Cascade)
 }
+
+model activity_members {
+  id          Int        @id @default(autoincrement())
+  activity_id Int
+  user_id     Int
+  joined_at   DateTime   @default(now())
+  activity    activities @relation(fields: [activity_id], references: [id], onDelete: Cascade)
+  user        users      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([activity_id, user_id])
+}
+
+model activity_messages {
+  id          Int        @id @default(autoincrement())
+  activity_id Int
+  sender_id   Int
+  content     String
+  created_at  DateTime   @default(now())
+  activity    activities @relation(fields: [activity_id], references: [id], onDelete: Cascade)
+  sender      users      @relation("ActivityMessageSender", fields: [sender_id], references: [id], onDelete: Cascade)
+}
+
