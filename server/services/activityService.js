@@ -1,38 +1,14 @@
 import prisma from '../config/prisma.js'
-import {
-  ACTIVITY_CATEGORIES,
-  getActivityCategoryVariants,
-  resolveActivityCategory
-} from '../constants/activityCategories.js'
-
-const CATEGORY_BY_VALUE = new Map(
-  ACTIVITY_CATEGORIES.flatMap(item => {
-    return getActivityCategoryVariants(item.category).map(value => [value, item])
-  })
-)
-
-const normalizeActivity = (activity) => {
-  const baseCategory = CATEGORY_BY_VALUE.get(activity.category)
-  if (!baseCategory) return activity
-
-  return {
-    ...activity,
-   
-    category: baseCategory.category,
-    image_url: activity.image_url || baseCategory.image_url
-  }
-}
 
 export const getActivities = async (city, category) => {
   const where = {}
+
   if (category) {
-    const resolvedCategory = resolveActivityCategory(category)
-    if (!resolvedCategory) return []
-    where.category = { in: getActivityCategoryVariants(resolvedCategory) }
-  } else {
-    where.category = {
-      in: ACTIVITY_CATEGORIES.flatMap(item => getActivityCategoryVariants(item.category))
-    }
+    where.category = category
+  }
+
+  if (city) {
+    where.city = city
   }
 
   const activities = await prisma.activities.findMany({
@@ -40,31 +16,15 @@ export const getActivities = async (city, category) => {
     include: {
       _count: {
         select: {
-          groups: city ? { where: { city } } : true
+          groups: true,
+          activity_members: true
         }
       }
-    }
+    },
+    orderBy: { created_at: 'desc' }
   })
 
-  const activitiesByCategory = new Map()
-  for (const activity of activities.map(normalizeActivity)) {
-    const existingActivity = activitiesByCategory.get(activity.category)
-    if (!existingActivity) {
-      activitiesByCategory.set(activity.category, activity)
-      continue
-    }
-
-    activitiesByCategory.set(activity.category, {
-      ...existingActivity,
-      _count: {
-        groups: existingActivity._count.groups + activity._count.groups
-      }
-    })
-  }
-
-  return ACTIVITY_CATEGORIES
-    .map(item => activitiesByCategory.get(item.category))
-    .filter(Boolean)
+  return activities
 }
 
 export const getActivityById = async (id) => {
@@ -89,11 +49,9 @@ export const getActivityById = async (id) => {
   return activity
 }
 
-// ── Création d'activité avec détection de doublons ──────────────
 export const createActivityService = async ({ title, description, category, city, creatorId }) => {
   const trimmedTitle = title.trim()
 
-  // 1. Doublon exact (insensible à la casse)
   const exactMatch = await prisma.activities.findFirst({
     where: { title: { equals: trimmedTitle, mode: 'insensitive' } }
   })
@@ -103,7 +61,6 @@ export const createActivityService = async ({ title, description, category, city
     throw error
   }
 
-  // 2. Doublons similaires (mots-clés communs de plus de 3 lettres)
   const keywords = trimmedTitle
     .toLowerCase()
     .split(/\s+/)
@@ -126,7 +83,6 @@ export const createActivityService = async ({ title, description, category, city
     }
   }
 
-  // 3. Création + ajout du créateur comme membre
   const activity = await prisma.activities.create({
     data: {
       title: trimmedTitle,
@@ -146,7 +102,7 @@ export const createActivityService = async ({ title, description, category, city
 
   return activity
 }
-// ── Rejoindre une activité ───────────────────────────────────────
+
 export const joinActivityService = async (activityId, userId) => {
   const activity = await prisma.activities.findUnique({ where: { id: parseInt(activityId) } })
   if (!activity) {
@@ -170,7 +126,7 @@ export const joinActivityService = async (activityId, userId) => {
 
   return { message: 'Activité rejointe avec succès' }
 }
-// ── Quitter une activité ─────────────────────────────────────────
+
 export const leaveActivityService = async (activityId, userId) => {
   const membership = await prisma.activity_members.findUnique({
     where: { activity_id_user_id: { activity_id: parseInt(activityId), user_id: userId } }
@@ -187,7 +143,7 @@ export const leaveActivityService = async (activityId, userId) => {
 
   return { message: 'Activité quittée avec succès' }
 }
-// ── Membres d'une activité ───────────────────────────────────────
+
 export const getActivityMembersService = async (activityId) => {
   const members = await prisma.activity_members.findMany({
     where: { activity_id: parseInt(activityId) },
