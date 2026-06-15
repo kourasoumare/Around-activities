@@ -41,7 +41,12 @@ export const getActivityById = async (id) => {
           max_members: true,
           contact_link: true,
           creator_id: true,
-          _count: { select: { memberships: true } }
+          _count: { select: { memberships: true } },
+          memberships: {
+            select: {
+              user_id: true
+            }
+          }
         }
       }
     }
