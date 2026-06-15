@@ -1,4 +1,4 @@
-import { getActivities, getActivityById, createActivityService, joinActivityService, leaveActivityService, getActivityMembersService } from '../services/activityService.js'
+import { getActivities, getActivityById, createActivityService, updateActivityService, joinActivityService, leaveActivityService, getActivityMembersService } from '../services/activityService.js'
 
 export const getActivitiesHandler = async (req, res) => {
   try {
@@ -55,6 +55,18 @@ export const createActivityHandler = async (req, res) => {
     }
     console.error(error)
     res.status(500).json({ message: "Erreur lors de la création de l'activité" })
+  }
+}
+// ── PUT /api/activities/:id ────────────────────────────────────────
+export const updateActivityHandler = async (req, res) => {
+  try {
+    const { title, description, category, city, image_url } = req.body
+    const activity = await updateActivityService(req.params.id, req.user.id, { title, description, category, city, image_url })
+    res.json(activity)
+  } catch (error) {
+    if (error.statusCode) return res.status(error.statusCode).json({ message: error.message })
+    console.error(error)
+    res.status(500).json({ message: 'Erreur serveur' })
   }
 }
 // ── POST /api/activities/:id/join ─────────────────────────────────

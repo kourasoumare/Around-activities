@@ -108,6 +108,33 @@ export const createActivityService = async ({ title, description, category, city
   return activity
 }
 
+export const updateActivityService = async (activityId, userId, { title, description, category, city, image_url }) => {
+  const activity = await prisma.activities.findUnique({ where: { id: parseInt(activityId) } })
+  if (!activity) {
+    const error = new Error('Activité non trouvée')
+    error.statusCode = 404
+    throw error
+  }
+
+  if (activity.creator_id !== userId) {
+    const error = new Error('Non autorisé')
+    error.statusCode = 403
+    throw error
+  }
+
+  const data = {}
+  if (title !== undefined) data.title = title.trim()
+  if (description !== undefined) data.description = description
+  if (category !== undefined) data.category = category
+  if (city !== undefined) data.city = city
+  if (image_url !== undefined) data.image_url = image_url
+
+  return prisma.activities.update({
+    where: { id: parseInt(activityId) },
+    data
+  })
+}
+
 export const joinActivityService = async (activityId, userId) => {
   const activity = await prisma.activities.findUnique({ where: { id: parseInt(activityId) } })
   if (!activity) {
