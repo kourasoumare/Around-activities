@@ -18,8 +18,20 @@ const httpServer = createServer(app);
 
 const io = initSocket(httpServer);
 
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'http://dk98qrn70lcfl4msm49zwat0.194.163.185.211.sslip.io',
+  'https://dk98qrn70lcfl4msm49zwat0.194.163.185.211.sslip.io',
+  // Ajoute ici le domaine custom quand le prof le débloque
+];
+
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Autoriser les requêtes sans origin (ex: Postman, mobile)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS bloqué pour l'origine : ${origin}`));
+  },
   credentials: true
 }));
 
@@ -71,7 +83,6 @@ io.on('connection', async (socket) => {
   socket.on('send_message', async ({ group_id, content }) => {
     try {
       const message = await createMessageService({
-  
         sender_id: userId,
         group_id: parseInt(group_id),
         content
@@ -101,9 +112,9 @@ io.on('connection', async (socket) => {
     }
   });
 
-   socket.on('join_activity', (activityId) => {
-    socket.join(`activity:${activityId}`)
-  })
+  socket.on('join_activity', (activityId) => {
+    socket.join(`activity:${activityId}`);
+  });
 
   socket.on('send_activity_message', async ({ activity_id, content }) => {
     try {
@@ -111,14 +122,12 @@ io.on('connection', async (socket) => {
         sender_id: userId,
         activity_id: parseInt(activity_id),
         content
-      })
-      io.to(`activity:${activity_id}`).emit('new_activity_message', message)
+      });
+      io.to(`activity:${activity_id}`).emit('new_activity_message', message);
     } catch (err) {
-      socket.emit('error', { message: err.message })
+      socket.emit('error', { message: err.message });
     }
-  })
-
-
+  });
 });
 
 const PORT = process.env.PORT || 5000;
