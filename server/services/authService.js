@@ -111,7 +111,7 @@ export const forgotPassword = async ({ email }) => {
       from: "cissebambi451@gmail.com",
       to: email,
       subject: "Reset your password",
-      html: `<p>Click <a href="${process.env.FRONTEND_URL}/reset-password?token=${resetToken}">here</a> to reset your password. Link expires in 1 hour.</p>`
+      html: `<p>Click <a href="${process.env.FRONTEND_URL}/reinitialiser-mot-de-passe?token=${resetToken}">here</a> to reset your password. Link expires in 1 hour.</p>`
     })
   } catch (emailErr) {
     console.error("Email sending failed:", emailErr.message)
