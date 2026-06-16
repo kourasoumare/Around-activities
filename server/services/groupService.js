@@ -1,12 +1,63 @@
 import prisma from '../config/prisma.js'
 
+// Calcule les dates suivantes selon la fréquence
+function getNextDates(startDate, frequency, count) {
+  const dates = []
+  let current = new Date(startDate)
+
+  for (let i = 1; i < count; i++) {
+    const next = new Date(current)
+    if (frequency === 'weekly') {
+      next.setDate(next.getDate() + 7)
+    } else if (frequency === 'biweekly') {
+      next.setDate(next.getDate() + 14)
+    } else if (frequency === 'monthly') {
+      next.setMonth(next.getMonth() + 1)
+    }
+    dates.push(new Date(next))
+    current = next
+  }
+  return dates
+}
+
 export const createGroupService = async (groupData, userId) => {
+  const {
+    is_recurring,
+    recurrence_frequency,
+    recurrence_count,
+    ...baseData
+  } = groupData
+
+  // Créer le groupe principal
   const group = await prisma.groups.create({
-    data: { ...groupData, creator_id: userId }
+    data: { ...baseData, creator_id: userId }
   })
+
+  // Ajouter le créateur comme membre
   await prisma.memberships.create({
     data: { user_id: userId, group_id: group.id }
   })
+
+  // Si récurrent, créer les occurrences suivantes
+  if (is_recurring && recurrence_frequency && recurrence_count > 1) {
+    const nextDates = getNextDates(baseData.meeting_date, recurrence_frequency, recurrence_count)
+
+    for (const date of nextDates) {
+      const occurrence = await prisma.groups.create({
+        data: {
+          ...baseData,
+          creator_id: userId,
+          meeting_date: date,
+          // Lier à la série via le nom (on garde le même nom)
+        }
+      })
+      // Le créateur rejoint aussi les occurrences
+      await prisma.memberships.create({
+        data: { user_id: userId, group_id: occurrence.id }
+      })
+    }
+  }
+
   return group
 }
 
