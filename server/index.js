@@ -22,7 +22,7 @@ const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://dk98qrn70lcfl4msm49zwat0.194.163.185.211.sslip.io',
   'https://dk98qrn70lcfl4msm49zwat0.194.163.185.211.sslip.io',
-  // Ajoute ici le domaine custom quand le prof le débloque
+  'https://frontend-around-activities-v2.onrender.com'
 ];
 
 app.use(cors({
