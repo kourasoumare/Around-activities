@@ -12,6 +12,8 @@ import groupRoutes from './routes/groups.js';
 import friendRoutes from './routes/friends.js';
 import messageRoutes from './routes/messages.js';
 import { createMessageService, createActivityMessageService } from './services/messageService.js';
+import notificationRoutes from './routes/notification.js';
+import { createNotification } from './services/notificationService.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -43,6 +45,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
@@ -88,10 +91,35 @@ io.on('connection', async (socket) => {
         content
       });
       io.to(`group:${group_id}`).emit('new_message', message);
+
+      // Notifier tous les membres du groupe sauf l'expéditeur
+      const sender = await prisma.users.findUnique({
+        where: { id: userId },
+        select: { first_name: true }
+      });
+      const memberships = await prisma.memberships.findMany({
+        where: { group_id: parseInt(group_id) },
+        select: { user_id: true }
+      });
+      const group = await prisma.groups.findUnique({
+        where: { id: parseInt(group_id) },
+        select: { name: true }
+      });
+      for (const { user_id } of memberships) {
+        if (user_id === userId) continue;
+        const notif = await createNotification({
+          user_id,
+          type: 'group_message',
+          content: `${sender.first_name} a envoyé un message dans "${group.name}"`,
+          link: `/conversations?group=${group_id}`
+        });
+        io.to(`user:${user_id}`).emit('new_notification', notif);
+      }
     } catch (err) {
       socket.emit('error', { message: err.message });
     }
   });
+
 
   socket.on('join_private', ({ friendId }) => {
     const roomId = [userId, parseInt(friendId)].sort((a, b) => a - b).join('-');
@@ -107,6 +135,20 @@ io.on('connection', async (socket) => {
       });
       const roomId = [userId, parseInt(receiver_id)].sort((a, b) => a - b).join('-');
       io.to(`private:${roomId}`).emit('new_private_message', message);
+
+      // Créer une notification pour le destinataire
+      const sender = await prisma.users.findUnique({
+        where: { id: userId },
+        select: { first_name: true }
+      });
+     const notification = await createNotification({
+        user_id: parseInt(receiver_id),
+        type: 'dm',
+        content: `${sender.first_name} t'a envoyé un message`,
+        link: `/conversations?userId=${userId}`
+         });
+      io.to(`user:${parseInt(receiver_id)}`).emit('new_notification', notification);
+
     } catch (err) {
       socket.emit('error', { message: err.message });
     }
@@ -124,6 +166,30 @@ io.on('connection', async (socket) => {
         content
       });
       io.to(`activity:${activity_id}`).emit('new_activity_message', message);
+
+      // Notifier tous les membres de l'activité sauf l'expéditeur
+      const sender = await prisma.users.findUnique({
+        where: { id: userId },
+        select: { first_name: true }
+      });
+      const activity = await prisma.activities.findUnique({
+        where: { id: parseInt(activity_id) },
+        select: { title: true }
+      });
+      const members = await prisma.activity_members.findMany({
+        where: { activity_id: parseInt(activity_id) },
+        select: { user_id: true }
+      });
+      for (const { user_id } of members) {
+        if (user_id === userId) continue;
+        const notif = await createNotification({
+          user_id,
+          type: 'activity_message',
+          content: `${sender.first_name} a envoyé un message dans "${activity.title}"`,
+          link: `/conversations?activity=${activity_id}`
+        });
+        io.to(`user:${user_id}`).emit('new_notification', notif);
+      }
     } catch (err) {
       socket.emit('error', { message: err.message });
     }
