@@ -28,9 +28,15 @@ export const createGroupService = async (groupData, userId) => {
     ...baseData
   } = groupData
 
-  // Créer le groupe principal
+  // Créer le groupe principal (on garde la trace de la récurrence sur CE groupe)
   const group = await prisma.groups.create({
-    data: { ...baseData, creator_id: userId }
+    data: {
+      ...baseData,
+      creator_id: userId,
+      is_recurring: !!is_recurring,
+      recurrence_frequency: is_recurring ? recurrence_frequency : null,
+      recurrence_count: is_recurring ? recurrence_count : null,
+    }
   })
 
   // Ajouter le créateur comme membre
@@ -48,7 +54,10 @@ export const createGroupService = async (groupData, userId) => {
           ...baseData,
           creator_id: userId,
           meeting_date: date,
-          // Lier à la série via le nom (on garde le même nom)
+          is_recurring: true,
+          recurrence_frequency,
+          recurrence_count,
+          // Lié à la série via le nom (on garde le même nom)
         }
       })
       // Le créateur rejoint aussi les occurrences

@@ -33,6 +33,16 @@ export const sendFriendRequestService = async (requesterId, receiverId) => {
   const io = getIO()
   if (io) {
     io.to(`user:${receiverId}`).emit('friend_request', friendship.requester)
+
+    // Créer et envoyer la notification
+    const { createNotification } = await import('./notificationService.js')
+    const notif = await createNotification({
+      user_id: receiverId,
+      type: 'friend_request',
+      content: `${friendship.requester.first_name} t'a envoyé une demande d'ami`,
+      link: `/demandes-ami`
+    })
+    io.to(`user:${receiverId}`).emit('new_notification', notif)
   }
 
   return friendship
